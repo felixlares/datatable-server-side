@@ -79,6 +79,10 @@ Route::get('/products', function (Request $request)
         return $item;
       });
     Log::alert(["Hola" => $request->all()]);
-    return DataTables::of($products)->make(true);
+
+    if ($request->ajax()) {
+      return Datatables::of($products)->make(true);
+    }
+    return view('datatable.datatable', compact('products'));
 }
 )->name('products');
