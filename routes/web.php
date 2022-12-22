@@ -22,11 +22,15 @@ Route::get('/', function () {
 });
 Route::get('/products', function (Request $request)
 {
+  Log::alert(["start" => $request->start, "length"=> $request->length, ]);
+
+  
     $productsDB = DB::table('products')
     ->leftJoin('product_warehouse_sections', 'products.product_warehouse_section_id', '=', 'product_warehouse_sections.id')
       ->leftJoin('product_manufacturers', 'products.product_manufacturer_id', '=', 'product_manufacturers.id')
       ->leftJoin('product_categories', 'products.product_categorie_id', '=', 'product_categories.id')
       ->where('products.deleted_at', NULL)
+      // ->skip($request->start ? $request->start : 0)->take($request->length ? $request->length : 25)
       ->get([
         'products.id',
         'products.part_number',
@@ -78,10 +82,13 @@ Route::get('/products', function (Request $request)
         $item->price_average = $item->price_average;
         return $item;
       });
-    Log::alert(["Hola" => $request->all()]);
+
+      $productsCount = DB::table('products')->get()->count();
 
     if ($request->ajax()) {
-      return Datatables::of($products)->make(true);
+      $productsDatatables = Datatables::of($products)->make(true);      
+      log::alert(["res"=> $productsDatatables]);
+      return $productsDatatables;
     }
     return view('datatable.datatable', compact('products'));
 }
